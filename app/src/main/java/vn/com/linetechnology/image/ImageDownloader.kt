@@ -45,8 +45,8 @@ class ImageLoader() {
                 println("ImageLoader.load: $url $percent% $byteLen")
                 onProgressUpdate(percent, byteLen)
             }, { byteLen: Int, output: File? ->
-                //TODO
                 println("ImageLoader.load: $url $output $byteLen")
+                ImageDecoder(context, onCompleted).execute(output)
             }).execute(url)
         } else {
             println("ImageLoader.load: $url from cache")
@@ -148,20 +148,3 @@ class ImageDownloader(
 fun getCachedImageFileFromUrl(context: Context, url: String): File? {
     return File(context.cacheDir, "imageCache/${url.hashCode()}.i")
 }
-
-fun getOptimizedBitmap(bm: Bitmap, newHeight: Int, newWidth: Int): Bitmap? {
-    val width = bm.width
-    val height = bm.height
-    val scaleWidth = newWidth.toFloat() / width
-    val scaleHeight = newHeight.toFloat() / height
-    // CREATE A MATRIX FOR THE MANIPULATION
-    val matrix = Matrix()
-    // RESIZE THE BIT MAP
-    matrix.postScale(scaleWidth, scaleHeight)
-    // "RECREATE" THE NEW BITMAP
-    return Bitmap.createBitmap(
-        bm, 0, 0, width, height,
-        matrix, false
-    )
-}
-
