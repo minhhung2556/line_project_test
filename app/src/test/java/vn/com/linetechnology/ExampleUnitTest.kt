@@ -17,7 +17,6 @@ class ExampleUnitTest {
         val m = SampleMovie.fromJson(sampleJsonData)
         assertNotNull(m)
         assertNotNull(m?.title)
-        assertNotEquals(m?.image?.size ?: 0, 0)
-        assertNotNull(m?.image?.get(0))
+        assertNotNull(m?.image?.next())
     }
 }
