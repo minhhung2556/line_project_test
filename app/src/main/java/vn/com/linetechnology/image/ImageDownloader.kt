@@ -46,12 +46,24 @@ class ImageLoader {
                 onProgressUpdate(percent, byteLen)
             }, { byteLen: Int, output: File? ->
                 println("ImageLoader.load: $url $output $byteLen")
-                ImageDecoder(context, onCompleted).execute(output)
+                ImageDecoder(context) { bitmap:Bitmap? ->
+                    if(bitmap!=null) addCache(url, bitmap)
+                    onCompleted(bitmap)
+                }.execute(output)
             }).execute(url)
         } else {
             println("ImageLoader.load: $url from cache")
             onCompleted(cachedBitmap)
         }
+    }
+
+    fun addCache(img: String, bitmap: Bitmap){
+        memoryCache.put(img, bitmap)
+    }
+
+    fun removeCache(img: String){
+        val bm = memoryCache.remove(img)
+        bm.recycle()
     }
 
     private fun checkCachedBitmap(url: String): Bitmap? {

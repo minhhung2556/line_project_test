@@ -16,7 +16,7 @@ data class MainActivityState(
 )
 
 class MainActivity : AppCompatActivity() {
-    val imageLoader = ImageLoader()
+    private val imageLoader = ImageLoader()
     var state: MainActivityState = initState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,34 +47,52 @@ class MainActivity : AppCompatActivity() {
         val list = ArrayList<String>()
         model?.image?.forEach { list += it }
         update(this.state.copy(images = list, currentImage = 0, model = model))
-        loadImage()
+        loadImages()
     }
 
-    private fun loadImage() {
-        this.state.images?.forEach { img ->
-            setImage(img)
+    private fun loadImages() {
+        if (this.state.images?.isNotEmpty() != true) return
+
+        tv_progress.visibility = View.VISIBLE
+        val lastCallBack = { _: Bitmap? ->
+            onDoneLoadingImages()
         }
+        val len = this.state.images!!.size
+        var img: String
+        for (i in 0 until len) {
+            img = this.state.images!![i]
+            imageLoader.load(baseContext, img, { percent: Int, byteLen: Int ->
+                tv_progress.text = "$percent - $byteLen"
+            }, if (i == len - 1) lastCallBack else { bm: Bitmap? -> })
+        }
+    }
+
+    private fun onDoneLoadingImages() {
+        tv_progress.visibility = View.GONE
+        setImage(null,this.state.images!![this.state.currentImage!!])
     }
 
     private fun changeImage() {
-        if (this.state.images?.isNotEmpty() == true){
-            val images = this.state.images
-            var index:Int = this.state.currentImage?:0
-            if (this.state.currentImage!! < images!!.size - 1)
-                index++
-            else index = 0
-            val img = images[index]
+        if (this.state.images?.isNotEmpty() != true) return
 
-            update(this.state.copy(currentImage = index))
+        val images = this.state.images
+        var index: Int = this.state.currentImage ?: 0
+        if (this.state.currentImage!! < images!!.size - 1)
+            index++
+        else index = 0
+        val img = images[index]
+        val prevImg = images[this.state.currentImage!!]
 
-            setImage(img)
-        }
+        update(this.state.copy(currentImage = index))
+        setImage(prevImg,img)
     }
 
-    private fun setImage(img: String){
+    private fun setImage(prevImg: String?, img: String) {
+        if(prevImg!=null) imageLoader.removeCache(prevImg)
+
         im_movie_image.setImageResource(R.color.colorLoadingGrey)
-        imageLoader.load(baseContext, img, { percent: Int, byteLen: Int ->
-            tv_progress.text = "$percent - $byteLen"
+
+        imageLoader.load(baseContext, img, { _: Int, _: Int ->
         }, { bitmap: Bitmap? ->
             im_movie_image.setImageBitmap(bitmap)
         })
