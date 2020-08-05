@@ -121,34 +121,37 @@ class ImageDownloader(
                 .openConnection() as HttpURLConnection
             connection.doInput = true
             connection.connect()
-            copyInputStreamToFile(connection.inputStream, output)
+            val inputStreamLen = connection.contentLength
+            copyInputStreamToFile(inputStreamLen, connection.inputStream, output)
 //            connection.disconnect()
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
-    private fun copyInputStreamToFile(inputStream: InputStream, file: File?) {
+    private fun copyInputStreamToFile(inputStreamLen: Int, inputStream: InputStream, file: File?) {
         var out: OutputStream? = null
         try {
             if (file != null) {
                 if (file.exists()) {
                     file.delete()
                 }
-                file.parentFile.mkdirs()
+                file.parentFile?.mkdirs()
                 file.createNewFile()
             }
 
-            this.inputStreamLen = inputStream.available()
+            this.inputStreamLen = inputStreamLen
             out = FileOutputStream(file!!)
             val buf = ByteArray(1024)
             var len: Int
             this.outStreamLen = 0
+            var percent: Int
             while (inputStream.read(buf).also { len = it } > 0) {
-                this.outStreamLen = len
+                this.outStreamLen += len
                 out.write(buf, 0, len)
-                //FIXME percent
-                publishProgress((this.outStreamLen * 100.0 / this.inputStreamLen.toFloat()).toInt())
+                percent = (this.outStreamLen*100)/this.inputStreamLen
+                println("ImageDownloader.copyInputStreamToFile: outStreamLen=$outStreamLen, inputStreamLen=${this.inputStreamLen}, percent=$percent")
+                publishProgress(percent)
             }
         } catch (e: Exception) {
             e.printStackTrace()
