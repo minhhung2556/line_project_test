@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
     private fun setImage(prevImg: String?, img: String) {
         if(prevImg!=null) imageLoader.removeCache(prevImg)
 
-        im_movie_image.setImageResource(R.color.colorLoadingGrey)
+        im_movie_image.setImageResource(R.color.colorTransparent)
 
         imageLoader.load(baseContext, img, { _: Int, _: Int ->
         }, { bitmap: Bitmap? ->
