@@ -10,8 +10,8 @@ import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
 import java.net.URL
 
-class ImageLoader() {
-    private lateinit var memoryCache: LruCache<String, Bitmap>
+class ImageLoader {
+    private var memoryCache: LruCache<String, Bitmap>
 
     init {
         // Get max available VM memory, exceeding this amount will throw an
@@ -79,6 +79,11 @@ class ImageDownloader(
         try {
             val inputUrl = params[0]!!
             this.output = getCachedImageFileFromUrl(this.mContext.get()!!, inputUrl)
+
+            if(output?.exists() == true){
+                return this.output
+            }
+
             downloadToFile(inputUrl, this.output)
             return this.output
         } catch (e: Exception) {
