@@ -118,6 +118,7 @@ class ImageDownloader(
                 if (file.exists()) {
                     file.delete()
                 }
+                file.parentFile.mkdirs()
                 file.createNewFile()
             }
 
