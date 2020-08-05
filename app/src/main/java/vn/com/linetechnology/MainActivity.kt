@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI() {
         tv_movie_title.text = state.model?.title ?: ""
-        //TODO
     }
 
     private fun loadData() {
@@ -66,11 +65,14 @@ class MainActivity : AppCompatActivity() {
             else index = 0
             val img = images[index]
 
+            update(this.state.copy(currentImage = index))
+
             setImage(img)
         }
     }
 
-    fun setImage(img: String){
+    private fun setImage(img: String){
+        im_movie_image.setImageResource(R.color.colorLoadingGrey)
         imageLoader.load(baseContext, img, { percent: Int, byteLen: Int ->
             tv_progress.text = "$percent - $byteLen"
         }, { bitmap: Bitmap? ->
